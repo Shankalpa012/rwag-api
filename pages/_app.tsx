@@ -11,14 +11,12 @@ function MyApp({ Component, pageProps }) {
 
 
   return (
-    <ChakraProvider>
-     <QueryClientProvider client = {queryClient} >
-        <Hydrate state= {pageProps.dehydratedState}>
+      <QueryClientProvider client = {queryClient} >
+        <ChakraProvider>
             <Component {...pageProps} />
-          <ReactQueryDevtools initialIsOpen ={false} position="bottom-right"/>
-        </Hydrate>
+        </ChakraProvider>
+        <ReactQueryDevtools initialIsOpen ={false} position="bottom-right"/>
       </QueryClientProvider>
-    </ChakraProvider>
   )
 }
 
