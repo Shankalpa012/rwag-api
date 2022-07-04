@@ -1,4 +1,6 @@
 import { Button, ButtonGroup } from '@chakra-ui/react'
+//
+import {useQuery} from 'react-query'
 
 function Navbar() {
   return (

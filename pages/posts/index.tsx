@@ -1,5 +1,5 @@
-import Navbar from "../components/Navbar";
-import Comment from "../components/Comment";
+import Navbar from "../../components/Navbar";
+import Comment from "../../components/Comment";
 
 //importing the react query 
 import { dehydrate, QueryClient, useQuery } from 'react-query';
@@ -20,7 +20,11 @@ import { Center, Square, Circle } from '@chakra-ui/react'
 import { Avatar, AvatarBadge, AvatarGroup } from '@chakra-ui/react'
 import { PhoneIcon, DeleteIcon,  AddIcon, WarningIcon } from '@chakra-ui/icons'
 import { Input,InputGroup,InputLeftElement,InputRightElement,InputRightAddon  } from '@chakra-ui/react'
-import { useState } from "react";
+import { useState,useEffect,useContext } from "react";
+import { Auth } from "../../context/AuthContext";
+import { getSingleUser, getSingleUserPost } from "../../services/api";
+import { UserContext } from "../../context/UserContext";
+
 
 
 
@@ -29,37 +33,48 @@ export default function Home(props) {
 
   const [color,setColor] = useState(true)
   const [heart,setHeart] =useState(false)
+  // const [user,setUser] = useState("")
+   // var user 
 
-  const {data:posts}  = useQuery('posts',
-    fetchPosts,
-    // {
-    //   initialData :props.posts
-    // }
-  )
+   const {user} = useContext(UserContext)
+  
+    const imgData = () =>{
+      setColor(false)
+      setHeart(true)
+    }
 
-  const imgData = () =>{
-    setColor(false)
-    setHeart(true)
-  }
+  // console.log(user)
+  const {data:userData,isLoading} = useQuery(["getSingleUser"],() => getSingleUserPost(user))
+
+     
+
+  // console.log(data)
 
   setTimeout(()=>{
     setHeart(false)
   },3000)
 
-
   return (
     <>
-        <Navbar></Navbar>
-        
-        <div className="bg-[#FAFAFA]">
-
-            {            
-                posts?.data.map(post => {
-                  const pic = posts.data[Math.floor(Math.random() * posts.data.length)]
+        <Navbar></Navbar>      
+        {
+          isLoading
+          ?
+          <h1>Data is loading</h1>
+          :
+          <div className="bg-[#FAFAFA]">
+          {            
+            userData?.length === 0 
+            ?
+            <h1>No data found</h1>
+            :
+                userData?.map(post => {
+                  // const pic = userData[Math.floor(Math.random() * userData.data.length)]
                   
                   const { owner } = post
 
                   return(
+
                       <div key = {post.id} className= 'bg-[#FFFFFF] border rounded-[5px] border-slate-200 lg:w-[40%] sm:w-[60%] w-[90%] mx-auto my-2'>
                         <div className= 'mx-2 p-2'>
 
@@ -133,11 +148,11 @@ export default function Home(props) {
                           
                       </div>
                     )
-                  })
-                
+                  }) 
               }
-
-        </div>
+      </div>
+        }   
+        
     </>
   )
 }
