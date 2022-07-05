@@ -40,7 +40,7 @@ const Login = ()=>{
         onSuccess: (res) => {
             message.success("Registered",3)
             setUser(res.data.id)
-            // localStorage.setItem("user",res.data.id)
+            localStorage.setItem("user",res.data.id)
             
         }
     })

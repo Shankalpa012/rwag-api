@@ -22,3 +22,9 @@ export const getSingleUserPost = async(user_id) =>{
     const responce = await axios.get(`${base_url}/user/${user_id}/post`,{headers}).then((res)=>res.data)
     return responce
 }
+
+//edit the users data
+export const editUserData = async (user_id,userData) => {
+    const responce = await axios.put(`${base_url}/user/${user_id}?page=2&limit=50`,userData,{headers}).then((res)=>res.data)
+    return responce
+}
