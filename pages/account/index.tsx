@@ -16,7 +16,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import {useMutation} from 'react-query'
 
 import { message } from '../../node_modules/antd/lib/index'
-
+import AddPostModel from "../../Shared/AddPostModel"
 
 //importing services
 import { createUser, getSingleUser } from "../../services/api"
@@ -24,6 +24,7 @@ import { createUser, getSingleUser } from "../../services/api"
 import {UserContext} from "../../context/UserContext"
 //importing model 
 import { User } from "../../models/dataModels"
+
 
 
 type formData = {
@@ -45,6 +46,7 @@ const schema = yup.object({
 const Account = () =>{  
 
     const [visible,setVisible] = useState(false)
+    const [postVisible,setPostVisible] =useState(false)
     const [value, setValue] = useState("Male");
 
    
@@ -99,6 +101,9 @@ const Account = () =>{
         console.log(data)
     }
 
+    const PostModel = () =>{
+        setPostVisible(true)
+    }
     
 
 
@@ -118,7 +123,6 @@ const Account = () =>{
                         <h1>{userData?.email}</h1>
                         <h1>{userData?.gender}</h1>
                         <h1>{userData?.phone}</h1>
-                        <h1>{userData?.location.country}</h1>
                     </div>
                 }
             </div>
@@ -132,7 +136,7 @@ const Account = () =>{
                 onCancel = {handleCancel}
                 visible = {visible}
                 width ={350}
-                footer={null}
+                
                 okButtonProps={{ color: "#06C755" }}
                 >
                     <form className="flex flex-col gap-y-2" onSubmit ={handleSubmit(data=>EditUser(data))} >
@@ -220,6 +224,12 @@ const Account = () =>{
                         {/* <button type="submit" >Submit</button> */}
                     </form>
                 </Modal>
+
+            <div className="border-2 border-slate-200 rounded-md p-1 cursor-pointer  w-[90%] text-center mx-auto my-2" onClick ={PostModel} >
+                <h1 className="font-semibold text-[12px] tracking-wider">Add Post</h1>
+            </div>
+
+            <AddPostModel value={postVisible} setValue={setPostVisible}/>
            
                 
         </div> 
