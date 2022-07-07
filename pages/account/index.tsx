@@ -19,11 +19,11 @@ import { message } from '../../node_modules/antd/lib/index'
 import AddPostModel from "../../Shared/AddPostModel"
 
 //importing services
-import { createUser, getSingleUser } from "../../services/api"
+import { createUser, getSingleUser,createPost,getSingleUserPost,editUserData } from "../../services/api"
 //importing context
 import {UserContext} from "../../context/UserContext"
 //importing model 
-import { User } from "../../models/dataModels"
+import { User,Post } from "../../models/dataModels"
 
 
 
@@ -32,7 +32,8 @@ type formData = {
     lastName:string,
     title:{value:string},
     gender:{value:string},
-    number:number
+    number:number,
+    picture:string
 }
 
 const schema = yup.object({ 
@@ -40,7 +41,8 @@ const schema = yup.object({
     lastName: yup.string().required("**Last Name should be There**"),
     title:yup.string().required("**Title must be Selected**"),
     gender:yup.string().required("**Gender is required**"),
-    number:yup.number().required("**Number is Required**")
+    number:yup.number().required("**Number is Required**"),
+    picture:yup.string().required("**Add a Profile Picture**")
 })
 
 const Account = () =>{  
@@ -48,6 +50,9 @@ const Account = () =>{
     const [visible,setVisible] = useState(false)
     const [postVisible,setPostVisible] =useState(false)
     const [value, setValue] = useState("Male");
+
+    const [firstName,setFirstName] = useState("")
+    const [lastName,setLastName] = useState("")
 
    
     const { Option } = Select
@@ -58,31 +63,54 @@ const Account = () =>{
     })
     
    
-    // console.log("this is the user",user)s
+    console.log("this is the user",user)
 
-   
+   //getting the data of user 
     const {data:userData ,isLoading} = useQuery <User> (["account-data"],() => getSingleUser (user),{
         enabled:!!user
     })
 
+    const {mutate:userDataUpdate} = useMutation ("edit-user",()=>editUserData(user,editUserData),{
+        onSuccess:()=>{
+            message.success("User Data Edited",3)
+        }
+    })
+
+    //getting post of specific user
+    const {data:userPostData} = useQuery <Post> (["post-data"],()=>getSingleUserPost(user),{
+        enabled : !!user
+    })
+
+
+    //creating the user post
+    const {mutate:createPostData} = useMutation((postData)=>createPost(postData),{
+        onSuccess:()=>{
+            message.success("Post Successfuly Created",3)
+        }
+    })
+
+
     // console.log("this is the data",user)
 
     //this is for the react-hooks forms
-    const {register,handleSubmit,watch,control, formState : { errors}} = useForm <formData> ({resolver:yupResolver(schema)})
+    const {register,handleSubmit,watch,control, reset, formState : { errors }} = useForm <formData> ({resolver:yupResolver(schema)})
     
-    const handelOk = () =>{
-        setVisible(!visible)
-    }
-    const handleCancel = () =>{
-        setVisible(!visible)
-    }
 
     const showModal = () => {
         setVisible(true);
-      };
+        setFirstName(userData?.firstName)
+        setLastName(userData?.lastName)
+
+    };
+
+    const handleCancel = () =>{
+        setVisible(false)
+    }
 
     const handelChange = (value:string) => {
         console.log("the value is ",value)
+        reset()
+
     }
 
 
@@ -93,12 +121,24 @@ const Account = () =>{
     };
 
    //this is for editing the user
-   const EditUser = (data) =>{
-        console.log(data)
+   const EditUser = (editData) =>{
+        userDataUpdate(user,editData)
+        setVisible(false)
+        reset()
+
    }
 
     const onSubmit :SubmitHandler<formData> = (data)=>{
         console.log(data)
+    }
+
+    //this is for creating a new post
+    const addPost = (postData) => {
+        console.log(postData)
+        postData.likes = 0
+        postData.owner = user
+        createPostData(postData)
+        setPostVisible(false)
     }
 
     const PostModel = () =>{
@@ -108,10 +148,16 @@ const Account = () =>{
 
 
     return(
-        <div className="w-[100%]  md:w-[80%] lg:w-[70%] m-auto" >
-            <div className="w-[90%] m-auto my-2  px-[5px] lg:px-[50px] py-3 flex justify-between items-center border-2 border-slate-200 rounded-md">
+        <div className="w-[100%]  md:w-[80%] lg:w-[70%] m-auto py-2"  >
+            <div className="w-[98%] m-auto my-2  px-[5px] lg:px-[50px] py-3 flex justify-between items-center border-2 border-slate-200 rounded-md">
                 <div>
-                    <Avatar  style={{ verticalAlign: 'middle' }} size={64} shape= "circle" icon={<UserOutlined/>}/>
+                    {
+                        userData?.picture != ""
+                        ?
+                        <Avatar  style={{ verticalAlign: 'middle' }} size={64} shape= "circle" icon={<UserOutlined/>}/>
+                        :
+                        <Avatar  style={{ verticalAlign: 'middle' }} size={64} shape= "circle" src={userData?.picture}/>
+                    }
                 </div>
                 {
                     isLoading
@@ -119,7 +165,7 @@ const Account = () =>{
                     <h1>data is Loading</h1>
                     :
                     <div className="leading-10">
-                        <h1 className="font-semibold text-[18px]" >{userData?.firstName}{userData?.lastName}</h1> 
+                        <h1 className="font-semibold text-[18px]" >{userData?.firstName} {userData?.lastName}</h1> 
                         <h1>{userData?.email}</h1>
                         <h1>{userData?.gender}</h1>
                         <h1>{userData?.phone}</h1>
@@ -127,19 +173,18 @@ const Account = () =>{
                 }
             </div>
 
-            <div className="border-2 border-slate-200 rounded-md p-1 cursor-pointer  w-[90%] text-center mx-auto my-2"  onClick={showModal}>
+            <div className="border-2 border-slate-200 rounded-md p-1 cursor-pointer w-[98%] text-center mx-auto my-2"  onClick={showModal}>
                 <h1 className="font-semibold text-[12px] tracking-wider">Edit</h1>
             </div>
             <Modal 
                 title="Edit User Info" 
-                onOk ={handelOk}
-                onCancel = {handleCancel}
                 visible = {visible}
                 width ={350}
-                
+                onCancel={handleCancel}
+                footer={null}
                 okButtonProps={{ color: "#06C755" }}
                 >
-                    <form className="flex flex-col gap-y-2" onSubmit ={handleSubmit(data=>EditUser(data))} >
+                    <form className="flex flex-col gap-y-2" onSubmit ={handleSubmit(EditUser)} >
                         {/* This is firstName Input**/}
                         <div className="">
                             <h1 className="font-semibold text-[14px]" >First Name</h1>
@@ -147,7 +192,7 @@ const Account = () =>{
                                 name='firstName'
                                 control={control}
                                 rules={{required:true}}
-                                defaultValue =""
+                                defaultValue ={firstName}
                                 render ={({field})=> <Input {...field} size="medium" placeholder="First Name"/>   }
                             />
                             <p className="text-red-500 italic text-sm">{errors.firstName?.message}</p>
@@ -162,7 +207,7 @@ const Account = () =>{
                                 name='lastName'
                                 control={control}
                                 rules = {{required:true}}
-                                defaultValue =""
+                                defaultValue ={lastName}
                                 render ={({field})=> <Input {...field} size="medium" placeholder="Last Name"/>   }
                             />
                             <p className="text-red-500 italic text-sm">{errors.lastName?.message}</p>
@@ -220,17 +265,40 @@ const Account = () =>{
                             
                         </div>
 
+                        <div className="flex flex-col gap-y-2">
+                            <h1 className="font-semibold text-[14px]" >Select Picture</h1>
+                            <Controller
+                                name='picture'
+                                control={control}
+                                rules={{required:true}}
+                                defaultValue =""
+                                render ={({field})=> <Input {...field} size="medium" placeholder="Profile Image"/>   }
+                            />
+                            <p className="text-red-500 italic text-sm">{errors.image?.message}</p>
+                        </div>
+
                         <input type="submit" className="bg-[#06C755] py-2 text-slate-200 my-2 rounded" />
                         {/* <button type="submit" >Submit</button> */}
                     </form>
                 </Modal>
 
-            <div className="border-2 border-slate-200 rounded-md p-1 cursor-pointer  w-[90%] text-center mx-auto my-2" onClick ={PostModel} >
+            <div className="border-2 border-slate-200 rounded-md p-1 cursor-pointer  w-[98%] text-center mx-auto my-2" onClick ={PostModel} >
                 <h1 className="font-semibold text-[12px] tracking-wider">Add Post</h1>
             </div>
 
-            <AddPostModel value={postVisible} setValue={setPostVisible}/>
-           
+            <AddPostModel value={postVisible} setValue={setPostVisible} data= {addPost} />
+            
+            <div className="grid grid-cols-3 gap-x-2 gap-y-2 p-2 w-[100%] lg:w-[95%] m-auto">
+                {
+                    userPostData?.data.map((data)=>{
+                        return(
+                            <>
+                                <img className=" w-[300px] lg:w-[350px]" src={data.image} alt="" />                                           
+                            </>
+                        )
+                    })
+                }
+            </div>
                 
         </div> 
     )

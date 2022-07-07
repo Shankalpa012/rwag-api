@@ -3,3 +3,10 @@ export interface User {
     lastName:string,
     email:string
 }
+
+export interface Post{
+    image:string,
+    likes:number,
+    tags:string[],
+    text:string,
+}
