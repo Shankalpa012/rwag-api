@@ -24,9 +24,9 @@ export const getUserPost = async() =>{
 }
 
 //edit the users data
-export const editUserData = async (user_id,userData) => {
-    const responce = await axios.put(`${base_url}/user/${user_id}?page=2&limit=50`,userData,{headers}).then((res)=>res.data)
-    return responce
+export const editUserData = async (user_id, editData) => {
+    console.log("This is the data",editData)
+    return await axios.put(`${base_url}/user/${user_id}?page=2&limit=50`,editData,{headers}).then((res)=>res.data)
 }
 
 //create post by user
@@ -40,3 +40,15 @@ export const getSingleUserPost = async (user_id) => {
     const responce = await axios.get(`${base_url}/user/${user_id}/post`,{headers}).then((res)=>res.data)
     return responce
 }
+
+//delete the psot 
+export const deletePost = async (post_id)=>{
+    const responce = await axios.delete(`${base_url}/post/${post_id}`,{headers}).then((res)=>res.data)
+    return responce
+}
+
+//add the comment to the post
+export const addComment = async (comment_data) => {
+    const responce = await axios.post(`${base_url}/comment/create`,comment_data,{headers}).then(res => res.data)
+}
+

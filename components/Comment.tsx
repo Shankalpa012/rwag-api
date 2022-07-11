@@ -6,7 +6,6 @@ const Comment =  ( props ) => {
 
     const { id } = props
 
-
     const fetchComments = async () => {
         return await fetch(`https://dummyapi.io/data/v1/post/${id}/comment`,{
             method:'GET',

@@ -6,12 +6,12 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 
 //getting the components from ant design
-import { Avatar,Modal,Input,Select,Radio  } from 'antd';
-import { UserContext } from '../context/UserContext';
+import { Avatar,Modal,Input,Select,Radio,   } from 'antd';
+import { UserContext } from '../../context/UserContext';
 
 type postFormData= {
     text:string,
-    tage:[string],
+    tags:[string],
     image:string,
 
 }
@@ -28,17 +28,20 @@ const AddPostModel = (props) => {
 
     const  { user,setUser } = useContext(UserContext)
 
+    const [text,setText ] = useState('daya')
+
     useEffect(()=>{
         setUser(localStorage.getItem("user"))
+
     })
 
     //getting the value true or false to opem window
-    const  { value : postVisible, setValue: setPostVisible,data:addPost } = props
+    const  { value : postVisible, setValue: setPostVisible,data:addPost, editData:edit } = props
     const {Option} = Select
     // const children: React.ReactNode[] = [];
 
     //regeserting in react hook form
-    const {register,control,reset,formState:{errors},handleSubmit} = useForm <postFormData> ({resolver:yupResolver(schema)})
+    const {register,control,reset,formState:{errors},handleSubmit } = useForm <postFormData> ({resolver:yupResolver(schema)})
 
     //these are the window modal function 
     const handleOk = () =>{
@@ -59,9 +62,8 @@ const AddPostModel = (props) => {
         addPost(data)
     }
 
-    const clear = ()=> {
-        
-    }
+    
+
 
 
     return(        
@@ -82,7 +84,7 @@ const AddPostModel = (props) => {
                             name='text'
                             control={control}
                             rules={{required:true}}
-                            defaultValue =""
+                            defaultValue = { text }
                             render ={({field})=> <Input {...field} size="medium" placeholder="Title"/>   }
                         />
                         <p className="text-red-500 italic text-sm">{errors.text?.message}</p>
